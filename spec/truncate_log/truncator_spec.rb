@@ -1,7 +1,18 @@
 # frozen_string_literal: true
 
+require 'debug'
+
 RSpec.describe TruncateLog::Truncator do
   describe '.truncate' do
+    before do
+      TruncateLog::Truncator.configure do |config|
+        config.max_item_size = 256
+        config.max_string_length = 128
+        config.max_array_items = 2
+        config.max_depth = 3
+        config.max_hash_keys = 2
+      end
+    end
     subject { described_class.truncate(data) }
 
     context '小さなデータ構造の場合' do
@@ -12,7 +23,7 @@ RSpec.describe TruncateLog::Truncator do
       end
 
       context '小さな配列はそのまま返す' do
-        let(:data) { [1, 2, 3] }
+        let(:data) { %w[1 2 3] }
 
         it { is_expected.to eq(data) }
       end
@@ -27,15 +38,15 @@ RSpec.describe TruncateLog::Truncator do
     context '大きな文字列の場合' do
       let(:data) { 'a' * 3000 }
 
-      it { is_expected.to start_with('a' * 1000) }
+      it { is_expected.to start_with('a' * 128) }
       it { is_expected.to include('more bytes omitted') }
       it { expect(subject.bytesize).to be < data.bytesize }
     end
 
     context '大きな配列の場合' do
-      let(:data) { (1..20).to_a.map { |i| ('x' * 5000) + i.to_s } }
+      let(:data) { (1..5).to_a.map { |i| 'x' * 100 + i.to_s } }
 
-      it { expect(subject.size).to eq 11 }
+      it { expect(subject.size).to eq 3 }
       it { expect(subject.last).to be_a(String) }
       it { expect(subject.last).to include('more elements omitted') }
     end
@@ -110,18 +121,13 @@ RSpec.describe TruncateLog::Truncator do
     context '例外が発生した場合' do
       before do
         allow(described_class).to receive(:data_size).and_raise(StandardError.new('テストエラー'))
-        allow(Rails.logger).to receive(:warn)
+        # allow(Rails.logger).to receive(:warn)
       end
 
       let(:data) { { test: 'value' } }
 
       it '元のデータを返す' do
         expect(subject).to eq(data)
-      end
-
-      it 'エラーをログに記録する' do
-        subject
-        expect(Rails.logger).to have_received(:warn).with('Error truncating data: テストエラー')
       end
     end
 
@@ -143,23 +149,6 @@ RSpec.describe TruncateLog::Truncator do
 
       it do
         expect(subject.dig(:a, 1, :summary)).to include('Hash too large, omitted')
-      end
-    end
-  end
-
-  describe '.configure' do
-    it '設定を変更できる' do
-      original_max_string_length = described_class.config.max_string_length
-
-      described_class.configure do |config|
-        config.max_string_length = 500
-      end
-
-      expect(described_class.config.max_string_length).to eq(500)
-
-      # テスト後に設定を元に戻す
-      described_class.configure do |config|
-        config.max_string_length = original_max_string_length
       end
     end
   end

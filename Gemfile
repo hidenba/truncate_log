@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in truncate_log.gemspec
 gemspec
 
+gem 'debug'
 gem 'irb'
 gem 'rake', '~> 13.0'
 

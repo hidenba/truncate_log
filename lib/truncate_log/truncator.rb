@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'json'
+
 module TruncateLog
   class Truncator
     @config = TruncateLog::Config.new
@@ -19,15 +21,14 @@ module TruncateLog
         truncated = case data
                     when String
                       max_length = config.max_string_length * threshold_multiplier
-                      "#{data[0...max_length]}... (#{data.bytesize - max_length} more bytes omitted)"
+                      "#{data[0..max_length]}... (#{data.bytesize - max_length} more bytes omitted)"
                     when Array
                       truncate_array(data, current_depth, max_depth, threshold_multiplier)
                     when Hash
                       truncate_hash(data, current_depth, max_depth, threshold_multiplier)
                     end
         truncate(truncated, current_depth, max_depth, threshold_multiplier * 0.5)
-      rescue StandardError => e
-        # logger.warn("Error truncating data: #{e.message}")
+      rescue StandardError
         data
       end
 
@@ -38,11 +39,12 @@ module TruncateLog
           return ["Array too large, omitted (#{array.size} elements)"]
         end
 
-        if array.size > config.max_array_items * threshold_multiplier
-          truncated = array.first(config.max_array_items).map do |item|
+        max_size = config.max_array_items * threshold_multiplier
+        if array.size > max_size
+          truncated = array[0..max_size].map do |item|
             truncate(item, current_depth + 1, max_depth, threshold_multiplier)
           end
-          truncated << "... (#{array.size - config.max_array_items} more elements omitted)"
+          truncated << "... (#{array.size - max_size} more elements omitted)"
 
           return truncated
         end
@@ -65,7 +67,7 @@ module TruncateLog
       end
 
       def data_size(data)
-        json_data = JSON.generate(data)
+        json_data = ::JSON.generate(data)
         json_data.bytesize
       end
     end
