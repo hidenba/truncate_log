@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module TruncateLog
   class Config
     attr_accessor :max_item_size, :max_string_length, :max_array_items, :max_hash_keys, :max_depth
