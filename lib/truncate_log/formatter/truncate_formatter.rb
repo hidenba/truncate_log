@@ -8,6 +8,7 @@ module TruncateLog
       attr_reader :original_formatter
 
       def initialize(original_formatter = nil)
+        super()
         @original_formatter = original_formatter || Logger::Formatter.new
       end
 
