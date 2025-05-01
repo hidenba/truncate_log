@@ -22,3 +22,7 @@ Metrics/CyclomaticComplexity:
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
+
+Layout/LineLength:
+  Exclude:
+    - '*.gemspec'
