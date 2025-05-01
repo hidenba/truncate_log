@@ -1,4 +1,41 @@
 module TruncateLog
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+
+  class Config
+    attr_accessor max_item_size: Integer
+    attr_accessor max_string_length: Integer
+    attr_accessor max_array_items: Integer
+    attr_accessor max_hash_keys: Integer
+    attr_accessor max_depth: Integer
+
+    def initialize: () -> void
+  end
+
+  class Truncator
+    self.@config: TruncateLog::Config
+
+    def self.config: () -> TruncateLog::Config
+    def self.configure: () { (TruncateLog::Config) -> void } -> void
+    def self.truncate: (untyped data, ?Integer current_depth, ?Integer max_depth, ?Numeric threshold_multiplier) -> untyped
+
+    private
+    def self.truncate_array: (Array[untyped] array, Integer current_depth, Integer max_depth, Numeric threshold_multiplier) -> Array[untyped]
+    def self.truncate_hash: (Hash[untyped, untyped] hash, Integer current_depth, Integer max_depth, Numeric threshold_multiplier) -> Hash[untyped, untyped]
+    def self.data_size: (untyped data) -> Integer
+  end
+
+  module Formatter
+    class TruncateFormatter < ::Logger::Formatter
+      attr_reader original_formatter: ::Logger::Formatter
+
+      def initialize: (?::Logger::Formatter? original_formatter) -> void
+      def call: (String severity, Time time, String progname, untyped msg) -> String
+    end
+
+    module SemanticLogger
+      class Truncate < ::SemanticLogger::Formatters::Json
+        def call: (untyped log, untyped logger) -> String
+      end
+    end
+  end
 end
