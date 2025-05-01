@@ -3,8 +3,7 @@
 require_relative 'truncate_log/version'
 require_relative 'truncate_log/config'
 require_relative 'truncate_log/truncator'
+require_relative 'truncate_log/formatter/truncate_formatter'
 
 module TruncateLog
-  class Error < StandardError; end
-  # Your code goes here...
 end
