@@ -121,7 +121,7 @@ logger.info(message: 'Large payload', payload: large_data)  # 自動的に切り
 
 ## 貢献
 
-バグレポートやプルリクエストはGitHubで歓迎しています: https://github.com/[USERNAME]/truncate_log
+バグレポートやプルリクエストはGitHubで歓迎しています: https://github.com/hidenba/truncate_log
 
 ## ライセンス
 

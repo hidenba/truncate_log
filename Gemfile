@@ -13,4 +13,5 @@ gem 'rspec', '~> 3.0'
 
 gem 'rubocop', '~> 1.21'
 
+gem 'logger', '>= 1.4.0'
 gem 'semantic_logger', '~> 4.0'
